@@ -16,6 +16,12 @@ black = "^24.4.2"
 flake8 = "^7.0.0"
 isort = "^5.13.2"
 mypy = "^1.10.0"
+alembic = "^1.13.1"
+pymysql = "^1.1.0"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.29"
+cryptography = "^42.0.6"
+sqlmodel = "^0.0.18"
 
 
 [build-system]
