@@ -1,0 +1,7 @@
+Generic single-database configuration.
+
+### マイグレーションファイル作成
+`alembic revision --autogenerate -m "hogehoge"`
+
+### マイグレーション実行
+`alembic upgrade head`
