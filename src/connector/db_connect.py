@@ -1,17 +1,9 @@
-import os
-
-from dotenv import load_dotenv
-from sqlmodel import create_engine
-
-load_dotenv()
-
-DB_USERNAME = os.environ.get("DB_USERNAME")
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DB_HOST = os.environ.get("DB_HOST")
-DB_DATABASE = os.environ.get("DB_DATABASE")
-
-DATABASE_URL = "mysql+pymysql://{}:{}@{}/{}".format(
-    DB_USERNAME, DB_PASSWORD, DB_HOST, DB_DATABASE
-)
+from sqlmodel import create_engine, Session
+from src.settings.db import DATABASE_URL
 
 engine = create_engine(DATABASE_URL, echo=True)
+
+
+def get_session():
+    with Session(engine) as session:
+        yield session
