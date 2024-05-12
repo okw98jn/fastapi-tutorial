@@ -1,4 +1,5 @@
-from sqlmodel import create_engine, Session
+from sqlmodel import Session, create_engine
+
 from src.settings.db import DATABASE_URL
 
 engine = create_engine(DATABASE_URL, echo=True)
