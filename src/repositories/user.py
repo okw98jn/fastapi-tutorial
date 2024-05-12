@@ -3,6 +3,7 @@ from typing import Sequence
 from sqlmodel import select
 
 from src.exceptions.not_found_exception import NotFoundException
+from src.logger import logger
 from src.models.user import User, UserCreate, UserUpdate
 from src.repositories.base import BaseRepository
 
@@ -39,6 +40,7 @@ class UserRepository(BaseRepository):
         user = self.session.get(User, user_id)
 
         if not user:
+            logger.error(f"User not found. user_id: {user_id}")
             raise NotFoundException()
 
         return user
@@ -52,45 +54,62 @@ class UserRepository(BaseRepository):
 
         Returns:
             User: 登録したユーザー情報
+
+        Raises:
+            Exception: 登録に失敗した場合の例外
         """
 
-        user = User.model_validate(create_data)
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
+        try:
+            user = User.model_validate(create_data)
+            self.session.add(user)
+            self.session.commit()
+            self.session.refresh(user)
 
-        return user
+            return user
+        except Exception as e:
+            logger.error(e)
+            raise e
 
-    def update_user(self, user_id: int, update_data: UserUpdate) -> User:
+    def update_user(self, user: User, update_data: UserUpdate) -> User:
         """
         ユーザー情報を更新するメソッド
 
         Args:
-            user_id (int): ユーザーID
+            user (User): ユーザー
             update_data (UserUpdate): 更新するユーザー情報
 
         Returns:
             User: 更新したユーザー情報
+
+        Raises:
+            Exception: 更新に失敗した場合の例外
         """
 
-        update_user_data = update_data.model_dump(exclude_unset=True)
+        try:
+            user.sqlmodel_update(update_data.model_dump(exclude_unset=True))
 
-        user = self.get_user(user_id)
-        user.sqlmodel_update(update_user_data)
+            self.session.commit()
+            self.session.refresh(user)
 
-        self.session.commit()
-        self.session.refresh(user)
+            return user
+        except Exception as e:
+            logger.error(e)
+            raise e
 
-        return user
-
-    def delete_user(self, user_id: int) -> None:
+    def delete_user(self, user: User) -> None:
         """
         ユーザーIDに対応するユーザー情報を削除するメソッド
 
         Args:
-            user_id (int): ユーザーID
+            user (User): 削除するユーザー
+
+        Raises:
+            Exception: 削除に失敗した場合の例外
         """
 
-        user = self.get_user(user_id)
-        self.session.delete(user)
-        self.session.commit()
+        try:
+            self.session.delete(user)
+            self.session.commit()
+        except Exception as e:
+            logger.error(e)
+            raise e

@@ -1,5 +1,6 @@
-from fastapi import Depends, Query
+from fastapi import Depends, HTTPException, Query
 
+from src.exceptions.not_found_exception import NotFoundException
 from src.models.user import UserCreate, UserPublic, UserUpdate
 from src.repositories.user import UserRepository
 
@@ -41,9 +42,15 @@ class UserController:
 
         Returns:
             UserPublic: ユーザー情報
+
+        Raises:
+            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        return UserPublic.model_validate(user_repository.get_user(user_id))
+        try:
+            return UserPublic.model_validate(user_repository.get_user(user_id))
+        except NotFoundException:
+            raise HTTPException(status_code=404, detail={"message": "Not Found"})
 
     @classmethod
     async def create(
@@ -78,16 +85,24 @@ class UserController:
 
         Returns:
             UserPublic: 更新したユーザー情報
+
+        Raises:
+            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        return UserPublic.model_validate(user_repository.update_user(user_id, user))
+        try:
+            return UserPublic.model_validate(
+                user_repository.update_user(user_repository.get_user(user_id), user)
+            )
+        except NotFoundException:
+            raise HTTPException(status_code=404, detail={"message": "Not Found"})
 
     @classmethod
     async def delete(
         cls, user_id: int, user_repository: UserRepository = Depends(UserRepository)
     ) -> dict[str, bool]:
         """
-        ユーザー情報を削除するクラスメソッド
+        ユーザー削除API
 
         Args:
             user_id (int): ユーザーID
@@ -95,8 +110,14 @@ class UserController:
 
         Returns:
             dict[str, str]: 削除完了メッセージ
+
+        Raises:
+            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        user_repository.delete_user(user_id)
+        try:
+            user_repository.delete_user(user_repository.get_user(user_id))
+            return {"is_deleted": True}
 
-        return {"ok": True}
+        except NotFoundException:
+            raise HTTPException(status_code=404, detail={"message": "Not Found"})
