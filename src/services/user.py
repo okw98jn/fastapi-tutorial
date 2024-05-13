@@ -5,10 +5,10 @@ from sqlmodel import select
 from src.exceptions.not_found_exception import NotFoundException
 from src.logger import logger
 from src.models.user import User, UserCreate, UserUpdate
-from src.repositories.base import BaseRepository
+from src.services.base import BaseService
 
 
-class UserRepository(BaseRepository):
+class UserService(BaseService):
     def get_users(self, offset: int, limit: int) -> Sequence[User]:
         """
         ユーザー一覧を返すメソッド
