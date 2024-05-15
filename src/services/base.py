@@ -1,5 +1,6 @@
-from sqlmodel import Session
 from fastapi import Depends
+from sqlmodel import Session
+
 from src.connector.db_connect import get_session
 
 
