@@ -1,31 +1,79 @@
 import logging
 import os
 import sys
+from datetime import datetime
+from logging.handlers import TimedRotatingFileHandler
 
-log_dir: str = "src/logs"
 
-# ディレクトリが存在しない場合に作成
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
+    """
+    ログファイルを日付ごとにローテーションするためのクラス
+    ログファイルの保存先は、logs/Ymd/ファイル名となる
+    """
+
+    def __init__(
+        self,
+        log_dir,
+        filename,
+        when="midnight",
+        interval=1,
+        backupCount=30,
+        encoding=None,
+        delay=False,
+        utc=False,
+        atTime=None,
+    ):
+        self.log_dir = log_dir
+        self.filename = filename
+        super().__init__(
+            self._get_log_file_path(),
+            when,
+            interval,
+            backupCount,
+            encoding,
+            delay,
+            utc,
+            atTime,
+        )
+
+    def _get_log_file_path(self):
+        date_str = datetime.now().strftime("%Y%m%d")
+        dated_log_dir = os.path.join(self.log_dir, date_str)
+        os.makedirs(dated_log_dir, exist_ok=True)  # ディレクトリ作成
+        return os.path.join(dated_log_dir, self.filename)
+
+
+log_dir = "src/logs"
 
 logger = logging.getLogger()
 
 logger.setLevel(logging.INFO)
 
+# フォーマッタの設定
 formatter = logging.Formatter(
     fmt="%(asctime)s - %(levelname)s - %(message)s in %(pathname)s:%(lineno)d",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+# ストリームハンドラーの設定
 stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setFormatter(formatter)
 
-app_handler = logging.FileHandler(log_dir + "/app.log")
+# アプリケーションログ用ファイルハンドラーの設定（毎日ローテーション）
+app_handler = CustomTimedRotatingFileHandler(
+    log_dir, "app.log", when="midnight", interval=1, backupCount=30
+)
 app_handler.setFormatter(formatter)
 app_handler.setLevel(logging.INFO)
 
-error_handler = logging.FileHandler(log_dir + "/error.log")
+# エラーログ用ファイルハンドラーの設定（毎日ローテーション）
+error_handler = CustomTimedRotatingFileHandler(
+    log_dir, "error.log", when="midnight", interval=1, backupCount=30
+)
 error_handler.setFormatter(formatter)
 error_handler.setLevel(logging.ERROR)
 
-logger.handlers = [stream_handler, app_handler, error_handler]
+# ハンドラーをロガーに追加
+logger.addHandler(stream_handler)
+logger.addHandler(app_handler)
+logger.addHandler(error_handler)
