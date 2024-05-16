@@ -43,6 +43,15 @@ class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
         return os.path.join(dated_log_dir, self.filename)
 
 
+# フィルタの設定
+class MaxLevelFilter(logging.Filter):
+    def __init__(self, max_level):
+        self.max_level = max_level
+
+    def filter(self, record):
+        return record.levelno <= self.max_level
+
+
 log_dir = "src/logs"
 
 logger = logging.getLogger()
@@ -71,7 +80,10 @@ error_handler = CustomTimedRotatingFileHandler(
     log_dir, "error.log", when="midnight", interval=1, backupCount=30
 )
 error_handler.setFormatter(formatter)
-error_handler.setLevel(logging.ERROR)
+error_handler.setLevel(logging.WARNING)
+
+# app_handlerにフィルタを追加してWARNINGレベル未満のログのみを記録
+app_handler.addFilter(MaxLevelFilter(logging.INFO))
 
 # ハンドラーをロガーに追加
 logger.addHandler(stream_handler)
