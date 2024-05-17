@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
-from src.connector.db_connect import engine
 from src.models.user import User
+from src.settings.db import engine
 
 with Session(engine) as session:
     users = [

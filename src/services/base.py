@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlmodel import Session
 
-from src.connector.db_connect import get_session
+from src.settings.db import get_session
 
 
 class BaseService:

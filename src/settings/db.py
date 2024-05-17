@@ -2,6 +2,7 @@ import os
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
+from sqlmodel import Session, create_engine
 
 from src.logger import logging
 
@@ -26,3 +27,17 @@ DATABASE_URL = (
     f"mysql+pymysql://{quote_plus(DB_USERNAME)}:{quote_plus(DB_PASSWORD)}"
     f"@{DB_HOST}/{DB_DATABASE}"
 )
+
+engine = create_engine(DATABASE_URL, echo=False)
+
+
+def get_session():
+    session = Session(engine)
+    try:
+        yield session
+    except Exception:
+        # ログは例外発生箇所で出力する
+        session.rollback()
+        raise
+    finally:
+        session.close()
