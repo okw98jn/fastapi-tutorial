@@ -25,27 +25,41 @@ async def log_middleware(request: Request, call_next) -> Response:
     }
     logger.info(f"Request: {request_log_dict}")
 
-    # レスポンスのログを記録するための準備
-    response = await call_next(request)
-    response_body = b""
+    try:
+        # レスポンスのログを記録するための準備
+        response = await call_next(request)
+        response_body = b""
+        async for chunk in response.body_iterator:
+            response_body += chunk
 
-    async for chunk in response.body_iterator:
-        response_body += chunk
+        response_log_dict = {
+            "client_ip": client_ip,
+            "url": str(request.url),
+            "method": request.method,
+            "status_code": response.status_code,
+            "body": response_body.decode("utf-8"),
+            "processing_time": f"{time.time() - start_time:.4f} seconds",
+        }
+        logger.info(f"Response: {response_log_dict}")
 
-    response_log_dict = {
-        "client_ip": client_ip,
-        "url": str(request.url),
-        "method": request.method,
-        "status_code": response.status_code,
-        "body": response_body.decode("utf-8"),
-        "processing_time": f"{time.time() - start_time:.4f} seconds",
-    }
-    logger.info(f"Response: {response_log_dict}")
+        return Response(
+            content=response_body,
+            status_code=response.status_code,
+            headers=dict(response.headers),
+            media_type=response.media_type,
+        )
 
-    # 新しいレスポンスオブジェクトを作成して返す
-    return Response(
-        content=response_body,
-        status_code=response.status_code,
-        headers=dict(response.headers),
-        media_type=response.media_type,
-    )
+    except Exception as e:
+        # 例外発生時のレスポンスログを記録
+        error_response_log_dict = {
+            "client_ip": client_ip,
+            "url": str(request.url),
+            "method": request.method,
+            "status_code": 500,
+            "body": {"detail": "Internal Server Error"},
+            "processing_time": f"{time.time() - start_time:.4f} seconds",
+        }
+        logger.info(f"Response: {error_response_log_dict}")
+
+        # 例外発生時のレスポンスはエラーハンドラーに任せる
+        raise e
