@@ -1,6 +1,5 @@
-from fastapi import Depends, HTTPException, Query
+from fastapi import Depends, Query
 
-from src.exceptions.not_found_exception import NotFoundException
 from src.models.user import UserCreate, UserPublic, UserUpdate
 from src.services.user import UserService
 
@@ -38,19 +37,13 @@ class UserController:
 
         Args:
             user_id (int): ユーザーID
-            user_service (UserService): ユーザーリポジトリ
+            user_service (UserService): ユーザーサービス
 
         Returns:
             UserPublic: ユーザー情報
-
-        Raises:
-            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        try:
-            return UserPublic.model_validate(user_service.get_user(user_id))
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail={"message": "Not Found"})
+        return UserPublic.model_validate(user_service.get_user(user_id))
 
     @classmethod
     async def create(
@@ -65,7 +58,6 @@ class UserController:
         Returns:
             UserPublic: 登録したユーザー情報
         """
-
         return UserPublic.model_validate(user_service.create_user(user))
 
     @classmethod
@@ -81,21 +73,15 @@ class UserController:
         Args:
             user_id (int): ユーザーID
             user (UserUpdate): ユーザー情報
-            user_service (UserService): ユーザーリポジトリ
+            user_service (UserService): ユーザーサービス
 
         Returns:
             UserPublic: 更新したユーザー情報
-
-        Raises:
-            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        try:
-            return UserPublic.model_validate(
-                user_service.update_user(user_service.get_user(user_id), user)
-            )
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail={"message": "Not Found"})
+        return UserPublic.model_validate(
+            user_service.update_user(user_service.get_user(user_id), user)
+        )
 
     @classmethod
     async def delete(
@@ -106,18 +92,11 @@ class UserController:
 
         Args:
             user_id (int): ユーザーID
-            user_service (UserService): ユーザーリポジトリ
+            user_service (UserService): ユーザーサービス
 
         Returns:
             dict[str, str]: 削除完了メッセージ
-
-        Raises:
-            HTTPException: ユーザーが見つからない場合の例外
         """
 
-        try:
-            user_service.delete_user(user_service.get_user(user_id))
-            return {"is_deleted": True}
-
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail={"message": "Not Found"})
+        user_service.delete_user(user_service.get_user(user_id))
+        return {"is_deleted": True}
