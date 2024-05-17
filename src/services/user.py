@@ -3,9 +3,9 @@ from typing import Sequence
 from sqlmodel import select
 
 from src.exceptions.not_found_exception import NotFoundException
-from src.logger import logger
 from src.models.user import User, UserCreate, UserUpdate
 from src.services.base import BaseService
+from src.settings.logger import logger
 
 
 class UserService(BaseService):

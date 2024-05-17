@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from sqlmodel import Session, create_engine
 
-from src.logger import logging
+from src.settings.logger import logger
 
 load_dotenv()
 
@@ -13,7 +13,7 @@ def get_env_variable(name: str) -> str:
     value = os.environ.get(name)
     if value is None:
         error_message = f"Environment variable {name} not set."
-        logging.error(error_message)
+        logger.error(error_message)
         raise EnvironmentError(error_message)
     return value
 
