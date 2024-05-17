@@ -18,7 +18,7 @@ class UserService(BaseService):
             limit (int): 取得件数
 
         Returns:
-            list[User]: ユーザー一覧
+            Sequence[User]: ユーザー一覧
         """
 
         return self.session.exec(select(User).offset(offset).limit(limit)).all()
@@ -40,8 +40,9 @@ class UserService(BaseService):
         user = self.session.get(User, user_id)
 
         if not user:
-            logger.error(f"User not found. user_id: {user_id}")
-            raise NotFoundException()
+            error_message = f"User not found. user_id: {user_id}"
+            logger.error(error_message)
+            raise NotFoundException(error_message)
 
         return user
 
