@@ -40,9 +40,8 @@ class UserService(BaseService):
         user = self.session.get(User, user_id)
 
         if not user:
-            error_message = f"User not found. user_id: {user_id}"
-            logger.error(error_message)
-            raise NotFoundException(error_message)
+            logger.error(f"User not found. user_id: {user_id}")
+            raise NotFoundException()
 
         return user
 
