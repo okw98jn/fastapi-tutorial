@@ -2,6 +2,7 @@ from typing import Sequence
 
 from sqlmodel import select
 
+from src.exceptions.custom_validation_exception import CustomValidationException
 from src.exceptions.not_found_exception import NotFoundException
 from src.models.user import User, UserCreate, UserUpdate
 from src.services.base import BaseService
@@ -56,16 +57,23 @@ class UserService(BaseService):
             User: 登録したユーザー情報
 
         Raises:
+            CustomValidationException: メールアドレスが重複している場合の例外
             Exception: 登録に失敗した場合の例外
         """
 
         try:
+            if self.get_user_id_by_email(create_data.email):
+                raise CustomValidationException(loc="email", msg="Email already exists")
+
             user = User.model_validate(create_data)
             self.session.add(user)
             self.session.commit()
             self.session.refresh(user)
 
             return user
+        except CustomValidationException:
+            # バリデーションエラーはログ出力しない
+            raise
         except Exception as e:
             logger.error(e)
             raise e
@@ -82,16 +90,24 @@ class UserService(BaseService):
             User: 更新したユーザー情報
 
         Raises:
+            CustomValidationException: メールアドレスが重複している場合の例外
             Exception: 更新に失敗した場合の例外
         """
 
         try:
+            registered_user_id = self.get_user_id_by_email(update_data.email or "")
+            if registered_user_id and registered_user_id != user.id:
+                raise CustomValidationException(loc="email", msg="Email already exists")
+
             user.sqlmodel_update(update_data.model_dump(exclude_unset=True))
 
             self.session.commit()
             self.session.refresh(user)
 
             return user
+        except CustomValidationException:
+            # バリデーションエラーはログ出力しない
+            raise
         except Exception as e:
             logger.error(e)
             raise e
@@ -113,3 +129,16 @@ class UserService(BaseService):
         except Exception as e:
             logger.error(e)
             raise e
+
+    def get_user_id_by_email(self, email: str) -> int | None:
+        """
+        メールアドレスに対応するユーザーidを返すメソッド
+
+        Args:
+            email (str): メールアドレス
+
+        Returns:
+            int | None: ユーザーID| ユーザーが存在しない場合はNone
+        """
+
+        return self.session.exec(select(User.id).where(User.email == email)).first()
