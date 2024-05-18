@@ -1,9 +1,11 @@
+from typing import Any, Dict, List, Sequence
+
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
-def translate_error_message(errors):
+def translate_error_message(errors: Sequence[Any]) -> List[Dict[str, str]]:
     translated_errors = []
 
     for error in errors:
@@ -19,7 +21,9 @@ def translate_error_message(errors):
     return translated_errors
 
 
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     return JSONResponse(
         status_code=422, content={"detail": translate_error_message(exc.errors())}
     )
