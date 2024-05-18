@@ -54,7 +54,7 @@ class MaxLevelFilter(logging.Filter):
 
 log_dir = "src/logs"
 
-logger = logging.getLogger()
+logger = logging.getLogger("uvicorn")
 
 logger.setLevel(logging.INFO)
 
