@@ -26,7 +26,7 @@ async def log_middleware(request: Request, call_next) -> Response:
     logger.info(f"Request: {request_log_dict}")
 
     try:
-        # レスポンスのログを記録するための準備
+        # レスポンスのログを記録
         response = await call_next(request)
         response_body = b""
         async for chunk in response.body_iterator:
