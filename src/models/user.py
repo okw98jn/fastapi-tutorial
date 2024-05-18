@@ -33,4 +33,3 @@ class UserCreate(UserBase):
 class UserUpdate(SQLModel):
     name: Optional[str] = None
     email: Optional[str] = None
-    password: Optional[str] = None
