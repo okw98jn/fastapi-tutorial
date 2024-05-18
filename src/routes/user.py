@@ -3,7 +3,8 @@ from fastapi import APIRouter
 from src.controllers.user import UserController
 from src.models.user import UserPublic
 
-router = APIRouter(prefix="/users", tags=["users"])
+# TODO:/apiを共通化する
+router = APIRouter(prefix="/api/users", tags=["users"])
 
 router.add_api_route(
     "/", UserController.index, methods=["GET"], response_model=list[UserPublic]
