@@ -7,6 +7,7 @@ from src.exceptions.not_found_exception import NotFoundException
 from src.models.user import User, UserCreate, UserUpdate
 from src.services.base import BaseService
 from src.settings.logger import logger
+from src.utils.hash import HashUtil
 
 
 class UserService(BaseService):
@@ -66,6 +67,8 @@ class UserService(BaseService):
                 raise CustomValidationException(loc="email", msg="Email already exists")
 
             user = User.model_validate(create_data)
+            user.password = HashUtil.get_password_hash(user.password)
+
             self.session.add(user)
             self.session.commit()
             self.session.refresh(user)
