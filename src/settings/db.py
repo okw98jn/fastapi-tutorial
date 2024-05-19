@@ -1,22 +1,8 @@
-import os
 from urllib.parse import quote_plus
 
-from dotenv import load_dotenv
 from sqlmodel import Session, create_engine
 
-from src.settings.logger import logger
-
-load_dotenv()
-
-
-def get_env_variable(name: str) -> str:
-    value = os.environ.get(name)
-    if value is None:
-        error_message = f"Environment variable {name} not set."
-        logger.error(error_message)
-        raise EnvironmentError(error_message)
-    return value
-
+from src.utils.environment import get_env_variable
 
 DB_USERNAME = get_env_variable("DB_USERNAME")
 DB_PASSWORD = get_env_variable("DB_PASSWORD")
@@ -28,7 +14,7 @@ DATABASE_URL = (
     f"@{DB_HOST}/{DB_DATABASE}"
 )
 
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(DATABASE_URL, echo=True)
 
 
 def get_session():
