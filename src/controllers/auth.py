@@ -22,7 +22,7 @@ class AuthController:
         auth_service: AuthService = Depends(AuthService),
     ) -> Token:
         """
-        ログイン処理を行うメソッド
+        ログインAPI
 
         Args:
             form_data (OAuth2PasswordRequestForm): フォームデータ
