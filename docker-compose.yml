@@ -16,12 +16,12 @@ services:
 
   fastapi-tutorial-db:
     container_name: fastapi-tutorial-db
-    build: ./docker/mysql
+    build: ./docker/postgres
     ports:
-      - "3309:3306"
+      - "5432:5432"
     volumes:
-      - fastapi-tutorial-db-volume:/var/lib/mysql
+      - fastapi-tutorial-db-volume:/var/lib/postgresql/data
     environment:
-      MYSQL_ROOT_USER: root
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: fastapi-tutorial
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: fastapi-tutorial

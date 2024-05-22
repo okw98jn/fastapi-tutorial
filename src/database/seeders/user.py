@@ -10,7 +10,7 @@ with Session(engine) as session:
             email=f"test{i+1}@example.com",
             password="1234",
         )
-        for i in range(10000)
+        for i in range(1000000)
     ]
     session.bulk_save_objects(users)
     session.commit()

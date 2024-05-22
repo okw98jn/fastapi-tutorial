@@ -7,11 +7,12 @@ from src.utils.environment import get_env_variable
 DB_USERNAME = get_env_variable("DB_USERNAME")
 DB_PASSWORD = get_env_variable("DB_PASSWORD")
 DB_HOST = get_env_variable("DB_HOST")
+DB_PORT = get_env_variable("DB_PORT")
 DB_DATABASE = get_env_variable("DB_DATABASE")
 
 DATABASE_URL = (
-    f"mysql+pymysql://{quote_plus(DB_USERNAME)}:{quote_plus(DB_PASSWORD)}"
-    f"@{DB_HOST}/{DB_DATABASE}"
+    f"postgresql://{quote_plus(DB_USERNAME)}:{quote_plus(DB_PASSWORD)}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
 )
 
 engine = create_engine(DATABASE_URL, echo=True)
