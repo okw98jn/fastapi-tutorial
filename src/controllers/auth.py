@@ -42,6 +42,6 @@ class AuthController:
             )
 
         return Token(
-            access_token=auth_service.create_access_token(data={"sub": user.email}),
+            access_token=auth_service.create_access_token(data={"sub": user.id}),
             token_type="bearer",
         )
