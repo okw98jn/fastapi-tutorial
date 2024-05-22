@@ -2,7 +2,7 @@ from typing import Sequence
 
 from sqlmodel import select
 
-from src.exceptions.custom_validation_exception import CustomValidationException
+from src.exceptions.conflict_exception import ConflictException
 from src.exceptions.not_found_exception import NotFoundException
 from src.models.user import User, UserCreate, UserUpdate
 from src.services.base import BaseService
@@ -64,7 +64,7 @@ class UserService(BaseService):
 
         try:
             if self.get_user_id_by_email(create_data.email):
-                raise CustomValidationException(loc="email", msg="Email already exists")
+                raise ConflictException(message="Email already exists")
 
             user = User.model_validate(create_data)
             user.password = HashUtil.get_password_hash(user.password)
@@ -74,8 +74,8 @@ class UserService(BaseService):
             self.session.refresh(user)
 
             return user
-        except CustomValidationException:
-            # バリデーションエラーはログ出力しない
+        except ConflictException:
+            # メールアドレス重複エラーはログ出力しない
             raise
         except Exception as e:
             logger.error(e)
@@ -100,7 +100,7 @@ class UserService(BaseService):
         try:
             registered_user_id = self.get_user_id_by_email(update_data.email or "")
             if registered_user_id and registered_user_id != user.id:
-                raise CustomValidationException(loc="email", msg="Email already exists")
+                raise ConflictException(message="Email already exists")
 
             user.sqlmodel_update(update_data.model_dump(exclude_unset=True))
 
@@ -108,8 +108,8 @@ class UserService(BaseService):
             self.session.refresh(user)
 
             return user
-        except CustomValidationException:
-            # バリデーションエラーはログ出力しない
+        except ConflictException:
+            # メールアドレス重複エラーはログ出力しない
             raise
         except Exception as e:
             logger.error(e)
