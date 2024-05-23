@@ -42,6 +42,7 @@ class AuthController:
             raise AuthenticationException()
 
         return Token(
-            access_token=auth_service.create_access_token(data={"sub": user.id}),
+            # strに変換しているのは、JWTトークンのdecodeでエラーが発生するため
+            access_token=auth_service.create_access_token(data={"sub": str(user.id)}),
             token_type="bearer",
         )
