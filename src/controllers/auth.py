@@ -1,7 +1,8 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
+from src.exceptions.authentication_exception import AuthenticationException
 from src.services.auth import AuthService
 
 
@@ -30,16 +31,15 @@ class AuthController:
 
         Returns:
             Token: トークン
+
+        Raises:
+            AuthenticationException: 認証エラー
         """
 
         user = auth_service.authenticate_user(form_data.username, form_data.password)
 
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise AuthenticationException()
 
         return Token(
             access_token=auth_service.create_access_token(data={"sub": user.id}),
