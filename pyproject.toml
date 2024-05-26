@@ -27,6 +27,7 @@ python-multipart = "^0.0.9"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 types-python-jose = "^3.3.4.20240106"
 psycopg2 = "^2.9.9"
+bcrypt = "4.0.1"
 
 
 [build-system]
