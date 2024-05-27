@@ -6,7 +6,7 @@ from src.models.user import UserPublic
 router = APIRouter(prefix="/users", tags=["users"])
 
 router.add_api_route(
-    "/", UserController.index, methods=["GET"], response_model=list[UserPublic]
+    "", UserController.index, methods=["GET"], response_model=list[UserPublic]
 )
 router.add_api_route(
     "/{user_id}", UserController.show, methods=["GET"], response_model=UserPublic
