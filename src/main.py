@@ -7,8 +7,8 @@ from src.routes import auth, user
 
 app = FastAPI(exception_handlers=APIExceptionHandler.handlers())
 
-app.add_middleware(LogMiddleware)
 app.add_middleware(AuthenticateMiddleware)
+app.add_middleware(LogMiddleware)
 
 # ルーターを登録する
 routers = [
