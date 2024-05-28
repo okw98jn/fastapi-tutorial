@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-from src.exceptions.authentication_exception import AuthenticationException
+from src.exceptions.login_failed_exception import LoginFailedException
 from src.services.auth import AuthService
 
 
@@ -33,13 +33,13 @@ class AuthController:
             Token: トークン
 
         Raises:
-            AuthenticationException: 認証エラー
+            LoginFailedException: 認証エラー
         """
 
         user = auth_service.authenticate_user(form_data.username, form_data.password)
 
         if not user:
-            raise AuthenticationException()
+            raise LoginFailedException()
 
         return Token(
             # strに変換しているのは、JWTトークンのdecodeでエラーが発生するため

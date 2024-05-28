@@ -31,7 +31,7 @@ class AuthenticateMiddleware(BaseHTTPMiddleware):
         token = request.headers.get("Authorization")
 
         if token is None:
-            # TODO: AuthenticationExceptionを使用する(raiseするとエラーになる)
+            # TODO: カスタム例外ハンドラーを使用するとエラーになるため一旦ここだけ直接レスポンスを返す(raiseするとエラーになる)
             return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
 
         try:
