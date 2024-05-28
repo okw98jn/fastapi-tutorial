@@ -42,7 +42,7 @@ class AuthController:
             raise LoginFailedException()
 
         return Token(
-            # strに変換しているのは、JWTトークンのdecodeでエラーが発生するため
+            # JWTトークンのdecodeでエラーが発生するためstrに変換
             access_token=auth_service.create_access_token(data={"sub": str(user.id)}),
             token_type="bearer",
         )
