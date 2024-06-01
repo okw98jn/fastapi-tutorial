@@ -58,7 +58,7 @@ class UserService(BaseService):
             User: 登録したユーザー情報
 
         Raises:
-            CustomValidationException: メールアドレスが重複している場合の例外
+            ConflictException: メールアドレスが重複している場合の例外
             Exception: 登録に失敗した場合の例外
         """
 
@@ -93,7 +93,7 @@ class UserService(BaseService):
             User: 更新したユーザー情報
 
         Raises:
-            CustomValidationException: メールアドレスが重複している場合の例外
+            ConflictException: メールアドレスが重複している場合の例外
             Exception: 更新に失敗した場合の例外
         """
 
