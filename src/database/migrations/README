@@ -5,3 +5,6 @@ Generic single-database configuration.
 
 ### マイグレーション実行
 `alembic upgrade head`
+
+### ダウングレード(初期化はbase)
+`alembic downgrade -1`
