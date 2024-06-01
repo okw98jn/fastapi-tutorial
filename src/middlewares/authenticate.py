@@ -25,7 +25,10 @@ class AuthenticateMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # ログインAPIは認証をスキップ
-        if request.url.path == "/api/auth/login":
+        if (
+            request.url.path == "/api/auth/login"
+            or request.url.path == "/api/auth/register"
+        ):
             return await call_next(request)
 
         token = request.headers.get("Authorization")
