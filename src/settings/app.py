@@ -20,3 +20,9 @@ GOOGLE_CLIENT_SECRET = get_env_variable("GOOGLE_CLIENT_SECRET")
 
 # GoogleコールバックURL
 GOOGLE_CALLBACK_URL = get_env_variable("GOOGLE_CALLBACK_URL")
+
+# GoogleトークンURL
+GOOGLE_TOKEN_URL = get_env_variable("GOOGLE_TOKEN_URL")
+
+# Googleユーザー情報URL
+GOOGLE_USER_INFO_URL = get_env_variable("GOOGLE_USER_INFO_URL")

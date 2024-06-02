@@ -29,14 +29,10 @@ class AuthController:
 
         user = auth_service.authenticate_user(form_data.username, form_data.password)
 
-        if not user:
+        if not user or not user.id:
             raise LoginFailedException()
 
-        return Token(
-            # JWTトークンのdecodeでエラーが発生するためstrに変換
-            access_token=auth_service.create_access_token(data={"sub": str(user.id)}),
-            token_type="bearer",
-        )
+        return auth_service.create_jwt_token(user.id)
 
     @classmethod
     async def register(
@@ -53,15 +49,17 @@ class AuthController:
 
         Returns:
             Token: トークン
+
+        Raises:
+            LoginFailedException: 認証エラー
         """
 
         user = auth_service.create_user(form_data.username, form_data.password)
 
-        return Token(
-            # JWTトークンのdecodeでエラーが発生するためstrに変換
-            access_token=auth_service.create_access_token(data={"sub": str(user.id)}),
-            token_type="bearer",
-        )
+        if not user.id:
+            raise LoginFailedException()
+
+        return auth_service.create_jwt_token(user.id)
 
     @classmethod
     async def google_auth_url(
@@ -76,3 +74,20 @@ class AuthController:
         """
 
         return auth_service.get_google_auth_url()
+
+    @classmethod
+    async def google_auth_callback(
+        cls,
+        code: str,
+        auth_service: AuthService = Depends(AuthService),
+    ) -> Token:
+        """
+        Google認証コールバックAPI
+
+        Returns:
+            Token: トークン
+        """
+        google_access_token = await auth_service.get_google_access_token(code)
+        user_email = await auth_service.get_google_user_email(google_access_token)
+
+        return auth_service.create_jwt_token(1)
