@@ -24,5 +24,5 @@ router.add_api_route(
     "/google-callback",
     AuthController.google_auth_callback,
     methods=["GET"],
-    response_model=str,
+    response_model=Token,
 )
