@@ -62,3 +62,17 @@ class AuthController:
             access_token=auth_service.create_access_token(data={"sub": str(user.id)}),
             token_type="bearer",
         )
+
+    @classmethod
+    async def google_auth_url(
+        cls,
+        auth_service: AuthService = Depends(AuthService),
+    ) -> str:
+        """
+        Google認証URL取得API
+
+        Returns:
+            str: Google認証URL
+        """
+
+        return auth_service.get_google_auth_url()

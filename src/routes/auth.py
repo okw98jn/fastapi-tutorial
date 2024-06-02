@@ -12,3 +12,10 @@ router.add_api_route(
 router.add_api_route(
     "/register", AuthController.register, methods=["POST"], response_model=Token
 )
+
+router.add_api_route(
+    "/google-url",
+    AuthController.google_auth_url,
+    methods=["GET"],
+    response_model=str,
+)

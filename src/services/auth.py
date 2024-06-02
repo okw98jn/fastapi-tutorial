@@ -1,3 +1,4 @@
+import urllib.parse
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt
@@ -6,7 +7,14 @@ from sqlmodel import select
 from src.exceptions.conflict_exception import ConflictException
 from src.models.user import User
 from src.services.base import BaseService
-from src.settings.app import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, JWT_SECRET_KEY
+from src.settings.app import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    GOOGLE_AUTHORIZATION_URL,
+    GOOGLE_CALLBACK_URL,
+    GOOGLE_CLIENT_ID,
+    JWT_SECRET_KEY,
+)
 from src.settings.logger import logger
 from src.utils.hash import HashUtil
 
@@ -101,3 +109,22 @@ class AuthService(BaseService):
         """
 
         return self.session.exec(select(User).where(User.email == email)).first()
+
+    def get_google_auth_url(self) -> str:
+        """
+        Google認証URLを取得するメソッド
+
+        Returns:
+            str: Google認証URL
+        """
+
+        params = {
+            "response_type": "code",
+            "client_id": GOOGLE_CLIENT_ID,
+            "redirect_uri": GOOGLE_CALLBACK_URL,
+            "scope": "openid email profile",
+            "access_type": "offline",
+            "prompt": "consent",
+        }
+
+        return f"{GOOGLE_AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
