@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from src.models.user import User  # noqa
+from src.models.user_social_account import UserSocialAccount  # noqa
 from src.settings.db import DATABASE_URL
 
 # this is the Alembic Config object, which provides

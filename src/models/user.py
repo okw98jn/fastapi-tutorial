@@ -1,7 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from src.models.user_social_account import UserSocialAccount
 
 
 class UserBase(SQLModel):
@@ -17,6 +20,10 @@ class User(UserBase, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(
         default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now}
+    )
+
+    user_social_accounts: list["UserSocialAccount"] = Relationship(
+        back_populates="user"
     )
 
 

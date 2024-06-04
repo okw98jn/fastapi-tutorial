@@ -1,8 +1,8 @@
 """create_users_table
 
-Revision ID: d9c79e9e2db0
+Revision ID: 14f85a4b19a5
 Revises:
-Create Date: 2024-06-04 00:41:18.381204
+Create Date: 2024-06-04 23:38:29.162956
 
 """
 
@@ -13,7 +13,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "d9c79e9e2db0"
+revision: str = "14f85a4b19a5"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
