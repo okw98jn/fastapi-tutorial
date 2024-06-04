@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 
 
@@ -34,11 +33,11 @@ class UserUpdate(SQLModel):
     email: Optional[str] = None
 
 
-class UserPasswordLogin(BaseModel):
+class UserPasswordLogin(SQLModel):
     email: str
     password: str
 
 
-class Token(BaseModel):
+class Token(SQLModel):
     token_type: str
     access_token: str
