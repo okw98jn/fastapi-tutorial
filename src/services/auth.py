@@ -7,7 +7,7 @@ from sqlmodel import select
 
 from src.exceptions.conflict_exception import ConflictException
 from src.exceptions.login_failed_exception import LoginFailedException
-from src.models.user import Token, User
+from src.models.user import Token, User, UserCreate, UserPasswordLogin
 from src.services.base import BaseService
 from src.settings.app import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -25,35 +25,36 @@ from src.utils.hash import HashUtil
 
 
 class AuthService(BaseService):
-    def authenticate_user(self, email: str, password: str) -> User | None:
+    def authenticate_user(self, user_data: UserPasswordLogin) -> User | None:
         """
         ユーザー認証を行うメソッド
 
         Args:
-            email (str): メールアドレス
-            password (str): パスワード
+            user_data (UserPasswordLogin): ユーザー情報
 
         Returns:
             User|None: ユーザー情報またはNone
         """
 
-        user = self.get_user_id_by_email(email)
+        user = self.get_user_id_by_email(user_data.email)
 
         if not user:
             return None
 
-        if not HashUtil.verify_password(password, user.password):
+        if not HashUtil.verify_password(user_data.password, user.password):
             return None
 
         return user
 
-    def create_user(self, email: str, password: str) -> User:
+    def create_user(
+        self,
+        user_data: UserCreate,
+    ) -> User:
         """
         ユーザーを作成するメソッド
 
         Args:
-            email (str): メールアドレス
-            password (str): パスワード
+            user_data (UserCreate): ユーザー情報
 
         Returns:
             User: ユーザー
@@ -63,10 +64,10 @@ class AuthService(BaseService):
         """
 
         try:
-            if self.get_user_id_by_email(email):
+            if self.get_user_id_by_email(user_data.email):
                 raise ConflictException(message="Email already exists")
 
-            user = User.model_validate({"email": email, "password": password})
+            user = User.model_validate(user_data)
             user.password = HashUtil.get_password_hash(user.password)
 
             self.session.add(user)
@@ -185,15 +186,15 @@ class AuthService(BaseService):
 
         return token_response_json.get("access_token")
 
-    async def get_google_user_email(self, access_token: str) -> str:
+    async def get_google_user(self, access_token: str) -> dict:
         """
-        Googleアクセストークンを使用してユーザーのメールアドレスを取得する
+        Googleアクセストークンを使用してユーザーの情報を取得する
 
         Args:
             access_token (str): Googleアクセストークン
 
         Returns:
-            str: ユーザーのメールアドレス
+            user_info_response_json (dict): ユーザー情報
 
         Raises:
             LoginFailedException: 認証エラー
@@ -211,4 +212,4 @@ class AuthService(BaseService):
             logger.error(user_info_response_json)
             raise LoginFailedException()
 
-        return user_info_response_json.get("email")
+        return user_info_response_json

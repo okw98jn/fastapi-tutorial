@@ -6,7 +6,7 @@ from sqlmodel import Field, SQLModel
 
 
 class UserBase(SQLModel):
-    name: Optional[str] = Field(default=None, nullable=True, max_length=255)
+    name: str = Field(max_length=255)
     email: str = Field(unique=True, max_length=255)
 
 
@@ -32,6 +32,11 @@ class UserCreate(UserBase):
 class UserUpdate(SQLModel):
     name: Optional[str] = None
     email: Optional[str] = None
+
+
+class UserPasswordLogin(BaseModel):
+    email: str
+    password: str
 
 
 class Token(BaseModel):

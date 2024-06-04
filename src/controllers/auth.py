@@ -1,8 +1,7 @@
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordRequestForm
 
 from src.exceptions.login_failed_exception import LoginFailedException
-from src.models.user import Token
+from src.models.user import Token, UserCreate, UserPasswordLogin
 from src.services.auth import AuthService
 
 
@@ -10,14 +9,14 @@ class AuthController:
     @classmethod
     async def login(
         cls,
-        form_data: OAuth2PasswordRequestForm = Depends(),
+        user_data: UserPasswordLogin,
         auth_service: AuthService = Depends(AuthService),
     ) -> Token:
         """
         ログインAPI
 
         Args:
-            form_data (OAuth2PasswordRequestForm): フォームデータ
+            user_data (UserPasswordLogin): ユーザー情報
             auth_service (AuthService): AuthServiceのインスタンス
 
         Returns:
@@ -27,7 +26,7 @@ class AuthController:
             LoginFailedException: 認証エラー
         """
 
-        user = auth_service.authenticate_user(form_data.username, form_data.password)
+        user = auth_service.authenticate_user(user_data)
 
         if not user or not user.id:
             raise LoginFailedException()
@@ -37,14 +36,14 @@ class AuthController:
     @classmethod
     async def register(
         cls,
-        form_data: OAuth2PasswordRequestForm = Depends(),
+        user_data: UserCreate,
         auth_service: AuthService = Depends(AuthService),
     ) -> Token:
         """
         サインアップAPI
 
         Args:
-            form_data (OAuth2PasswordRequestForm): フォームデータ
+            user_data (UserCreate): ユーザー情報
             auth_service (AuthService): AuthServiceのインスタンス
 
         Returns:
@@ -54,7 +53,7 @@ class AuthController:
             LoginFailedException: 認証エラー
         """
 
-        user = auth_service.create_user(form_data.username, form_data.password)
+        user = auth_service.create_user(user_data)
 
         if not user.id:
             raise LoginFailedException()
@@ -88,6 +87,6 @@ class AuthController:
             Token: トークン
         """
         google_access_token = await auth_service.get_google_access_token(code)
-        user_email = await auth_service.get_google_user_email(google_access_token)
+        user_data = await auth_service.get_google_user(google_access_token)
 
         return auth_service.create_jwt_token(1)
