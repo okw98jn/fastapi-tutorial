@@ -8,6 +8,7 @@ from sqlmodel import select
 from src.exceptions.conflict_exception import ConflictException
 from src.exceptions.login_failed_exception import LoginFailedException
 from src.models.user import Token, User, UserCreate, UserPasswordLogin
+from src.models.user_social_account import UserSocialAccount
 from src.services.base import BaseService
 from src.settings.app import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -36,7 +37,7 @@ class AuthService(BaseService):
             User|None: ユーザー情報またはNone
         """
 
-        user = self.get_user_id_by_email(user_data.email)
+        user = self.get_user_by_email(user_data.email)
 
         if not user:
             return None
@@ -64,7 +65,7 @@ class AuthService(BaseService):
         """
 
         try:
-            if self.get_user_id_by_email(user_data.email):
+            if self.get_user_by_email(user_data.email):
                 raise ConflictException(message="Email already exists")
 
             user = User.model_validate(user_data)
@@ -120,7 +121,7 @@ class AuthService(BaseService):
             token_type="bearer",
         )
 
-    def get_user_id_by_email(self, email: str) -> User | None:
+    def get_user_by_email(self, email: str) -> User | None:
         """
         メールアドレスに対応するユーザーを返すメソッド
 
@@ -213,3 +214,85 @@ class AuthService(BaseService):
             raise LoginFailedException()
 
         return user_info_response_json
+
+    def get_social_account(self, provider: str, provider_user_id: str) -> int | None:
+        """
+        ソーシャルアカウントを取得するメソッド
+
+        Args:
+            provider (str): プロバイダー名
+            provider_user_id (str): プロバイダーユーザーID
+
+        Returns:
+            int | None: ユーザーID | ユーザーが存在しない場合はNone
+        """
+
+        return self.session.exec(
+            select(UserSocialAccount.user_id)
+            .where(UserSocialAccount.provider == provider)
+            .where(UserSocialAccount.provider_user_id == provider_user_id)
+        ).first()
+
+    def create_social_account(
+        self, user_id: int, provider: str, provider_user_id: str
+    ) -> None:
+        """
+        ソーシャルアカウントを作成するメソッド
+
+        Args:
+            user_id (int): ユーザーID
+            provider (str): プロバイダー名
+            provider_user_id (str): プロバイダーユーザーID
+        """
+
+        social_account = UserSocialAccount(
+            user_id=user_id,
+            provider=provider,
+            provider_user_id=provider_user_id,
+        )
+
+        self.session.add(social_account)
+        self.session.commit()
+        self.session.refresh(social_account)
+
+    def create_user_with_social_account(
+        self,
+        user_data: UserCreate,
+        provider: str,
+        provider_user_id: str,
+    ) -> int:
+        """
+        ユーザーとソーシャルアカウントを作成するメソッド
+
+        Args:
+            user_data (UserCreate): ユーザー情報
+            provider (str): プロバイダー名
+            provider_user_id (str): プロバイダーユーザーID
+
+        Returns:
+            int: ユーザーID
+
+        Raises:
+            LoginFailedException: ログイン失敗
+        """
+        try:
+            user = User.model_validate(user_data)
+
+            self.session.add(user)
+            self.session.flush()
+
+            if user.id is None:
+                raise LoginFailedException()
+
+            social_account = UserSocialAccount(
+                user_id=user.id,
+                provider=provider,
+                provider_user_id=provider_user_id,
+            )
+
+            self.session.add(social_account)
+            self.session.commit()
+            return user.id
+        except Exception as e:
+            logger.error(e)
+            raise e

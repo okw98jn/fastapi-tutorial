@@ -87,6 +87,27 @@ class AuthController:
             Token: トークン
         """
         google_access_token = await auth_service.get_google_access_token(code)
-        user_data = await auth_service.get_google_user(google_access_token)
 
-        return auth_service.create_jwt_token(1)
+        google_user_data = await auth_service.get_google_user(google_access_token)
+
+        user_id = auth_service.get_social_account("google", google_user_data["sub"])
+        if user_id:
+            return auth_service.create_jwt_token(user_id)
+
+        user = auth_service.get_user_by_email(google_user_data["email"])
+        if user and user.id:
+            auth_service.create_social_account(
+                user.id, "google", google_user_data["sub"]
+            )
+            return auth_service.create_jwt_token(user.id)
+
+        user_id = auth_service.create_user_with_social_account(
+            UserCreate(
+                name=google_user_data["name"],
+                email=google_user_data["email"],
+            ),
+            "google",
+            google_user_data["sub"],
+        )
+
+        return auth_service.create_jwt_token(user_id)
